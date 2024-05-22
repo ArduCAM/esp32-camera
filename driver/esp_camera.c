@@ -69,6 +69,9 @@
 #if CONFIG_SC031GS_SUPPORT
 #include "sc031gs.h"
 #endif
+#if CONFIG_MEGA_CCM_SUPPORT
+#include "mega_ccm.h"
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -95,6 +98,9 @@ static camera_state_t *s_state = NULL;
 #define CAMERA_DISABLE_OUT_CLOCK() camera_disable_out_clock()
 #endif
 
+#define analog_gain    6
+#define mamual_exp_h   6
+#define mamual_exp_l   6
 typedef struct {
     int (*detect)(int slv_addr, sensor_id_t *id);
     int (*init)(sensor_t *sensor);
@@ -143,6 +149,9 @@ static const sensor_func_t g_sensors[] = {
 #if CONFIG_SC031GS_SUPPORT
     {sc031gs_detect, sc031gs_init},
 #endif
+#if CONFIG_MEGA_CCM_SUPPORT
+    {mega_ccm_detect, mega_ccm_init},
+#endif
 };
 
 static esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out_camera_model)
@@ -184,10 +193,14 @@ static esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out
         gpio_config(&conf);
 
         // carefull, logic is inverted compared to reset pin
-        gpio_set_level(config->pin_pwdn, 1);
+        gpio_set_level(config->pin_pwdn,1);
         vTaskDelay(10 / portTICK_PERIOD_MS);
-        gpio_set_level(config->pin_pwdn, 0);
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+
+        // close the led
+        conf.pin_bit_mask = 1LL << 3;
+        conf.mode = GPIO_MODE_OUTPUT;
+        gpio_config(&conf);
+        gpio_set_level(3, 0);
     }
 
     if (config->pin_reset >= 0) {
@@ -195,12 +208,13 @@ static esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out
         gpio_config_t conf = { 0 };
         conf.pin_bit_mask = 1LL << config->pin_reset;
         conf.mode = GPIO_MODE_OUTPUT;
-        gpio_config(&conf);
+         gpio_config(&conf);
 
         gpio_set_level(config->pin_reset, 0);
         vTaskDelay(10 / portTICK_PERIOD_MS);
         gpio_set_level(config->pin_reset, 1);
         vTaskDelay(10 / portTICK_PERIOD_MS);
+
     }
 
     ESP_LOGD(TAG, "Searching for camera address");
@@ -287,7 +301,15 @@ esp_err_t esp_camera_init(const camera_config_t *config)
 
     framesize_t frame_size = (framesize_t) config->frame_size;
     pixformat_t pix_format = (pixformat_t) config->pixel_format;
-
+    BRIGHTNESS_t brightness_t0 = (BRIGHTNESS_t) config->brightness_t; 
+    CONTRAST_t contrast_t0 = (CONTRAST_t) config->contrast_t;
+    SATURATION_t saturation_t0 = (SATURATION_t) config->saturation_t;
+    EXPOSURE_t exposure_t0 = (EXPOSURE_t) config->exposure_t; 
+    SPECIAL special0 = (SPECIAL) config->special; 
+    AWB_MODE awb_mode0 = (AWB_MODE) config->awb_mode; 
+    IMAGE_QUALITY image_quality0 = (IMAGE_QUALITY) config->image_quality; 
+    AGC_MODE agc_mode0 = (AGC_MODE) config->agc_mode; 
+    BYPASS bypass0 = (BYPASS) config->bypass;
     if (PIXFORMAT_JPEG == pix_format && (!camera_sensor[camera_model].support_jpeg)) {
         ESP_LOGE(TAG, "JPEG format is not supported on this sensor");
         err = ESP_ERR_NOT_SUPPORTED;
@@ -298,43 +320,34 @@ esp_err_t esp_camera_init(const camera_config_t *config)
         ESP_LOGW(TAG, "The frame size exceeds the maximum for this sensor, it will be forced to the maximum possible value");
         frame_size = camera_sensor[camera_model].max_size;
     }
-
     err = cam_config(config, frame_size, s_state->sensor.id.PID);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera config failed with error 0x%x", err);
         goto fail;
     }
 
-    s_state->sensor.status.framesize = frame_size;
     s_state->sensor.pixformat = pix_format;
+    s_state->sensor.status.framesize = frame_size;
 
-    ESP_LOGD(TAG, "Setting frame size to %dx%d", resolution[frame_size].width, resolution[frame_size].height);
+    s_state->sensor.set_pixformat(&s_state->sensor, pix_format);
+
+    s_state->sensor.set_brightness(&s_state->sensor, brightness_t0);
+    s_state->sensor.set_contrast(&s_state->sensor, contrast_t0);
+    s_state->sensor.set_saturation(&s_state->sensor, saturation_t0);
+    s_state->sensor.set_exposure_ctrl(&s_state->sensor, exposure_t0);
+    s_state->sensor.set_special_effect(&s_state->sensor, special0);
+    s_state->sensor.set_quality(&s_state->sensor, image_quality0);
+    s_state->sensor.set_AGC_mode(&s_state->sensor, agc_mode0);
+    s_state->sensor.set_agc_gain(&s_state->sensor, analog_gain);  
+    s_state->sensor.set_mamual_exp_h(&s_state->sensor, mamual_exp_h);    
+    s_state->sensor.set_mamual_exp_l(&s_state->sensor, mamual_exp_l);    
+    s_state->sensor.set_bypass(&s_state->sensor, bypass0);
     if (s_state->sensor.set_framesize(&s_state->sensor, frame_size) != 0) {
         ESP_LOGE(TAG, "Failed to set frame size");
         err = ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE;
         goto fail;
-    }
-    s_state->sensor.set_pixformat(&s_state->sensor, pix_format);
-#if CONFIG_CAMERA_CONVERTER_ENABLED
-    if(config->conv_mode) {
-        s_state->sensor.pixformat = get_output_data_format(config->conv_mode); // If conversion enabled, change the out data format by conversion mode
-    }
-#endif
-
-    if (s_state->sensor.id.PID == OV2640_PID) {
-        s_state->sensor.set_gainceiling(&s_state->sensor, GAINCEILING_2X);
-        s_state->sensor.set_bpc(&s_state->sensor, false);
-        s_state->sensor.set_wpc(&s_state->sensor, true);
-        s_state->sensor.set_lenc(&s_state->sensor, true);
-    }
-
-    if (pix_format == PIXFORMAT_JPEG) {
-        s_state->sensor.set_quality(&s_state->sensor, config->jpeg_quality);
-    }
-    s_state->sensor.init_status(&s_state->sensor);
-
+    }   
     cam_start();
-
     return ESP_OK;
 
 fail:

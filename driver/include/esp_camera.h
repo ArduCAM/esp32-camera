@@ -67,6 +67,7 @@
 #pragma once
 
 #include "esp_err.h"
+#include "esp_log.h"
 #include "driver/ledc.h"
 #include "sensor.h"
 #include "sys/time.h"
@@ -145,7 +146,15 @@ typedef struct {
 
     pixformat_t pixel_format;       /*!< Format of the pixel data: PIXFORMAT_ + YUV422|GRAYSCALE|RGB565|JPEG  */
     framesize_t frame_size;         /*!< Size of the output image: FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA  */
-
+    BRIGHTNESS_t  brightness_t;
+    CONTRAST_t    contrast_t;
+    SATURATION_t  saturation_t; 
+    EXPOSURE_t    exposure_t;
+    AWB_MODE      awb_mode;
+    SPECIAL       special;
+    IMAGE_QUALITY image_quality;
+    AGC_MODE      agc_mode;
+    BYPASS        bypass;
     int jpeg_quality;               /*!< Quality of JPEG output. 0-63 lower means higher quality  */
     size_t fb_count;                /*!< Number of frame buffers to be allocated. If more than one, then each frame will be acquired (double speed)  */
     camera_fb_location_t fb_location; /*!< The location where the frame buffer will be allocated */

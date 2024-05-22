@@ -31,6 +31,7 @@ typedef enum {
     SC101IOT_PID = 0xda4a,
     SC030IOT_PID = 0x9a46,
     SC031GS_PID = 0x0031,
+    MEGA_CCM_PID = 0x039E,
 } camera_pid_t;
 
 typedef enum {
@@ -48,6 +49,7 @@ typedef enum {
     CAMERA_SC101IOT,
     CAMERA_SC030IOT,
     CAMERA_SC031GS,
+    CAMERA_MEGA_CCM,
     CAMERA_MODEL_MAX,
     CAMERA_NONE,
 } camera_model_t;
@@ -66,7 +68,8 @@ typedef enum {
     BF20A6_SCCB_ADDR   = 0x6E,
     SC101IOT_SCCB_ADDR = 0x68,// 0xd0 >> 1
     SC030IOT_SCCB_ADDR = 0x68,// 0xd0 >> 1
-    SC031GS_SCCB_ADDR  = 0x30,
+    SC031GS_SCCB_ADDR  = 0x30, 
+    MEGA_CCM_SCCB_ADDR = 0x1F,// 0x3E >> 1
 } camera_sccb_addr_t;
 
 typedef enum {
@@ -82,12 +85,94 @@ typedef enum {
 } pixformat_t;
 
 typedef enum {
+    RST_PIN_LOW,      // 0
+    RST_PIN_HIGHT,    // 1
+} camera_test_t;
+
+typedef enum {  
+    brightness_0,      // default
+    brightness_1,      // +1
+    brightness_2,      // -1
+    brightness_3,      // +2
+    brightness_4,      // -2
+    brightness_5,      // +3
+    brightness_6,      // -3
+    brightness_7,      // +4
+    brightness_8,      // -4
+} BRIGHTNESS_t;
+
+typedef enum {  
+    contrast_0 ,      // default
+    contrast_1,      // +1
+    contrast_2,      // -1
+    contrast_3,      // +2
+    contrast_4,      // -2
+    contrast_5,      // +3
+    contrast_6,      // -3
+} CONTRAST_t;
+
+typedef enum {  
+    saturation_0 ,      // default
+    saturation_1,      // +1
+    saturation_2,      // -1
+    saturation_3,      // +2
+    saturation_4,      // -2
+    saturation_5,      // +3
+    saturation_6,      // -3
+} SATURATION_t;
+
+
+typedef enum {  
+    exposure_0 ,      // default
+    exposure_1,      // +1
+    exposure_2,      // -1
+    exposure_3,      // +2
+    exposure_4,      // -2
+    exposure_5,      // +3
+    exposure_6,      // -3
+} EXPOSURE_t;
+typedef enum {  
+    Auto,
+    sunny,
+    office,
+    cloudy,
+    home,
+} AWB_MODE;
+
+typedef enum {  
+    normal,
+    blueish,
+    redish,
+    BorW,
+    sepia,
+    negative,
+    greenish,
+} SPECIAL;
+
+typedef enum {  
+    quality_high,
+    quality_default,
+    quality_low,
+} IMAGE_QUALITY;
+
+typedef enum {  
+    AGC_Auto,
+    AGC_Manual,
+} AGC_MODE;
+
+typedef enum {  
+    disable,
+    enable,
+} BYPASS;
+typedef enum {
     FRAMESIZE_96X96,    // 96x96
+    FRAMESIZE_128x128,  // 128x128
     FRAMESIZE_QQVGA,    // 160x120
     FRAMESIZE_QCIF,     // 176x144
     FRAMESIZE_HQVGA,    // 240x176
     FRAMESIZE_240X240,  // 240x240
     FRAMESIZE_QVGA,     // 320x240
+    FRAMESIZE_320x320,  // 320x320
     FRAMESIZE_CIF,      // 400x296
     FRAMESIZE_HVGA,     // 480x320
     FRAMESIZE_VGA,      // 640x480
@@ -98,14 +183,15 @@ typedef enum {
     FRAMESIZE_UXGA,     // 1600x1200
     // 3MP Sensors
     FRAMESIZE_FHD,      // 1920x1080
-    FRAMESIZE_P_HD,     //  720x1280
-    FRAMESIZE_P_3MP,    //  864x1536
+    FRAMESIZE_P_HD,     // 720x1280
+    FRAMESIZE_P_3MP,    // 864x1536
     FRAMESIZE_QXGA,     // 2048x1536
     // 5MP Sensors
     FRAMESIZE_QHD,      // 2560x1440
     FRAMESIZE_WQXGA,    // 2560x1600
     FRAMESIZE_P_FHD,    // 1080x1920
     FRAMESIZE_QSXGA,    // 2560x1920
+    FRAMESIZE_5MP,      // 2592x1944
     FRAMESIZE_INVALID
 } framesize_t;
 
@@ -183,11 +269,12 @@ typedef struct {
     uint8_t denoise;
     uint8_t special_effect;//0 - 6
     uint8_t wb_mode;//0 - 4
+    uint8_t AGC_mode;//0 - 4
     uint8_t awb;
     uint8_t awb_gain;
     uint8_t aec;
     uint8_t aec2;
-    int8_t ae_level;//-2 - 2
+    int8_t   ae_level;//-2 - 2
     uint16_t aec_value;//0 - 1200
     uint8_t agc;
     uint8_t agc_gain;//0 - 30
@@ -210,41 +297,42 @@ typedef struct _sensor {
     camera_status_t status;
     int xclk_freq_hz;
 
-    // Sensor function pointers
-    int  (*init_status)         (sensor_t *sensor);
-    int  (*reset)               (sensor_t *sensor); // Reset the configuration of the sensor, and return ESP_OK if reset is successful
+    // Sensor function pointers     
+    int  (*set_Camera_rest)     (sensor_t *sensor, int level);  
     int  (*set_pixformat)       (sensor_t *sensor, pixformat_t pixformat);
     int  (*set_framesize)       (sensor_t *sensor, framesize_t framesize);
+    int  (*set_brightness)      (sensor_t *sensor, int level);    
     int  (*set_contrast)        (sensor_t *sensor, int level);
-    int  (*set_brightness)      (sensor_t *sensor, int level);
     int  (*set_saturation)      (sensor_t *sensor, int level);
+    int  (*set_exposure_ctrl)   (sensor_t *sensor, int enable); 
+    int  (*set_wb_mode)        (sensor_t *sensor, int mode);
+    int  (*set_special_effect)  (sensor_t *sensor, int effect);
+    int  (*set_quality)         (sensor_t *sensor, int quality);
+    int  (*set_AGC_mode)        (sensor_t *sensor, int mode);
+    int  (*set_agc_gain)        (sensor_t *sensor, int gain);
+    int  (*set_mamual_exp_h)    (sensor_t *sensor, int level);
+    int  (*set_mamual_exp_l)    (sensor_t *sensor, int level);
+    int  (*set_bypass)          (sensor_t *sensor, int level);
+    
+    int  (*init_status)         (sensor_t *sensor);
+    int  (*reset)               (sensor_t *sensor); // Reset the configuration of the sensor, and return ESP_OK if reset is successful
     int  (*set_sharpness)       (sensor_t *sensor, int level);
     int  (*set_denoise)         (sensor_t *sensor, int level);
     int  (*set_gainceiling)     (sensor_t *sensor, gainceiling_t gainceiling);
-    int  (*set_quality)         (sensor_t *sensor, int quality);
     int  (*set_colorbar)        (sensor_t *sensor, int enable);
     int  (*set_whitebal)        (sensor_t *sensor, int enable);
     int  (*set_gain_ctrl)       (sensor_t *sensor, int enable);
-    int  (*set_exposure_ctrl)   (sensor_t *sensor, int enable);
     int  (*set_hmirror)         (sensor_t *sensor, int enable);
     int  (*set_vflip)           (sensor_t *sensor, int enable);
-
     int  (*set_aec2)            (sensor_t *sensor, int enable);
     int  (*set_awb_gain)        (sensor_t *sensor, int enable);
-    int  (*set_agc_gain)        (sensor_t *sensor, int gain);
     int  (*set_aec_value)       (sensor_t *sensor, int gain);
-
-    int  (*set_special_effect)  (sensor_t *sensor, int effect);
-    int  (*set_wb_mode)         (sensor_t *sensor, int mode);
     int  (*set_ae_level)        (sensor_t *sensor, int level);
-
     int  (*set_dcw)             (sensor_t *sensor, int enable);
     int  (*set_bpc)             (sensor_t *sensor, int enable);
     int  (*set_wpc)             (sensor_t *sensor, int enable);
-
     int  (*set_raw_gma)         (sensor_t *sensor, int enable);
     int  (*set_lenc)            (sensor_t *sensor, int enable);
-
     int  (*get_reg)             (sensor_t *sensor, int reg, int mask);
     int  (*set_reg)             (sensor_t *sensor, int reg, int mask, int value);
     int  (*set_res_raw)         (sensor_t *sensor, int startX, int startY, int endX, int endY, int offsetX, int offsetY, int totalX, int totalY, int outputX, int outputY, bool scale, bool binning);

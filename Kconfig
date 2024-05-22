@@ -1,5 +1,4 @@
 menu "Camera configuration"
-
     config OV7670_SUPPORT
         bool "Support OV7670 VGA"
         default y
@@ -117,6 +116,13 @@ menu "Camera configuration"
             Enable this option if you want to use the SC031GS.
             Disable this option to save memory.
 
+    config MEGA_CCM_SUPPORT
+        bool "Support MEGA_CCM 5MP"
+        default n
+        help
+            Enable this option if you want to use the MEGA_CCM.
+            Disable this option to save memory.
+
     choice SCCB_HARDWARE_I2C_PORT
         bool "I2C peripheral to use for SCCB"
         default SCCB_HARDWARE_I2C_PORT1
@@ -130,8 +136,8 @@ menu "Camera configuration"
 
     config SCCB_CLK_FREQ
     int "SCCB clk frequency"
-    default 100000
-    range 100000 400000
+    default 1000
+    range 1000 400000
     help
         Increasing this value can reduce the initialization time of the sensor.
         Please refer to the relevant instructions of the sensor to adjust the value.
@@ -210,11 +216,6 @@ menu "Camera configuration"
             Full color range mode has a wider color range, so details in the image show more clearly.
             Please confirm the color range mode of the current camera sensor, incorrect color range mode may cause color difference in the final converted image.
             Full range mode is used by default. If this option is not selected, the format conversion function will be done using the limited range mode.
-
-    config LCD_CAM_ISR_IRAM_SAFE
-        bool "Execute camera ISR from IRAM"
-        depends on (IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3)
-        default n
-        help
-            If this option is enabled, camera ISR will execute from IRAM.
 endmenu
+
+
