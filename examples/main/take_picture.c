@@ -51,20 +51,6 @@
 #define _I2C_NUMBER(num) I2C_NUM_##num
 #define I2C_NUMBER(num) _I2C_NUMBER(num)
 
-// SLAVE I2C 
-#define CONFIG_I2C_SLAVE_SCL 18
-#define CONFIG_I2C_SLAVE_SDA 17
-#define CONFIG_I2C_SLAVE_PORT_NUM 1
-#define CONFIG_I2C_SLAVE_ADDRESS 0x0c
-#define DATA_LENGTH          512  /*!<Data buffer length for test buffer*/
-#define RW_TEST_LENGTH       129  /*!<Data length for r/w test, any value from 0-DATA_LENGTH*/
-#define DELAY_TIME_BETWEEN_ITEMS_MS   1234 /*!< delay time between different test items */
-#define I2C_SLAVE_SCL_IO CONFIG_I2C_SLAVE_SCL               /*!< gpio number for i2c slave clock */
-#define I2C_SLAVE_SDA_IO CONFIG_I2C_SLAVE_SDA               /*!< gpio number for i2c slave data */
-#define I2C_SLAVE_NUM I2C_NUMBER(CONFIG_I2C_SLAVE_PORT_NUM) /*!< I2C port number for slave dev */
-#define I2C_SLAVE_TX_BUF_LEN (2 * DATA_LENGTH)              /*!< I2C slave tx buffer size */
-#define I2C_SLAVE_RX_BUF_LEN (2 * DATA_LENGTH)              /*!< I2C slave rx buffer size */
-#define ESP_SLAVE_ADDR CONFIG_I2C_SLAVE_ADDRESS             /*!< ESP32 slave address, you can set any 7bit value */
 
 //ESP32S3-EYE
 #define CAM_PIN_PWDN 38
@@ -131,7 +117,7 @@ static camera_config_t camera_config = {
    .frame_size = FRAMESIZE_QVGA,
    //.frame_size = FRAMESIZE_VGA,
    //.frame_size = FRAMESIZE_HD,    
-   .frame_size = FRAMESIZE_UXGA,
+   //.frame_size = FRAMESIZE_UXGA,
    //.frame_size = FRAMESIZE_FHD,
    //.frame_size = FRAMESIZE_5MP,
 
@@ -190,11 +176,8 @@ static camera_config_t camera_config = {
     .agc_mode = AGC_Auto,
      //.agc_mode = AGC_Manual,
 
-    .bypass = enable,
-    // .bypass = disable,
-
     .jpeg_quality = 12, //0-63, for OV series camera sensors, lower number means higher quality
-    .fb_count = 1,       //When jpeg mode is used, if fb_count more than one, the driver will work in continuous mode.
+    .fb_count = 2,       //When jpeg mode is used, if fb_count more than one, the driver will work in continuous mode.
     .grab_mode = CAMERA_GRAB_WHEN_EMPTY,
 };
 

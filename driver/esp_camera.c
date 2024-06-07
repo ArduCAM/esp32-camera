@@ -309,7 +309,6 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     AWB_MODE awb_mode0 = (AWB_MODE) config->awb_mode; 
     IMAGE_QUALITY image_quality0 = (IMAGE_QUALITY) config->image_quality; 
     AGC_MODE agc_mode0 = (AGC_MODE) config->agc_mode; 
-    BYPASS bypass0 = (BYPASS) config->bypass;
     if (PIXFORMAT_JPEG == pix_format && (!camera_sensor[camera_model].support_jpeg)) {
         ESP_LOGE(TAG, "JPEG format is not supported on this sensor");
         err = ESP_ERR_NOT_SUPPORTED;
@@ -341,7 +340,6 @@ esp_err_t esp_camera_init(const camera_config_t *config)
     s_state->sensor.set_agc_gain(&s_state->sensor, analog_gain);  
     s_state->sensor.set_mamual_exp_h(&s_state->sensor, mamual_exp_h);    
     s_state->sensor.set_mamual_exp_l(&s_state->sensor, mamual_exp_l);    
-    s_state->sensor.set_bypass(&s_state->sensor, bypass0);
     if (s_state->sensor.set_framesize(&s_state->sensor, frame_size) != 0) {
         ESP_LOGE(TAG, "Failed to set frame size");
         err = ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE;

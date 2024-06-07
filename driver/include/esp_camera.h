@@ -154,7 +154,6 @@ typedef struct {
     SPECIAL       special;
     IMAGE_QUALITY image_quality;
     AGC_MODE      agc_mode;
-    BYPASS        bypass;
     int jpeg_quality;               /*!< Quality of JPEG output. 0-63 lower means higher quality  */
     size_t fb_count;                /*!< Number of frame buffers to be allocated. If more than one, then each frame will be acquired (double speed)  */
     camera_fb_location_t fb_location; /*!< The location where the frame buffer will be allocated */

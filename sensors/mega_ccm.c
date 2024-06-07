@@ -44,7 +44,6 @@ static const char *TAG = "mega_ccm";
 #define analog_gain_maix   6
 #define mamual_exp_h_maix  6
 #define mamual_exp_l_maix  6
-#define bypass_maix        1
 //#define REG_DEBUG_ON
 
 static int read_reg(uint8_t slv_addr, const uint16_t reg)
@@ -112,7 +111,6 @@ static int reset(sensor_t *sensor)
     return ret;
 }
 
-//设置相机复位
 static int set_Camera_rest(sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -126,7 +124,6 @@ static int set_Camera_rest(sensor_t *sensor, int level)
     }
     return ret;
 }
-//设置像素格式
 static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
 {
     int ret = 0;
@@ -155,7 +152,6 @@ static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
 
     return ret;
 }
-//设置像素分辨率
 static int set_framesize(sensor_t *sensor, framesize_t framesize)
 {
     int ret = 0;
@@ -193,7 +189,6 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
     return ret;
 }
 
-//设置光照
 static int set_brightness(sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -240,7 +235,6 @@ static int set_brightness(sensor_t *sensor, int level)
     return ret;
 }
 
-//设置对比度
 static int set_contrast(sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -282,7 +276,6 @@ static int set_contrast(sensor_t *sensor, int level)
     return ret;
 }
 
-//设置饱和度
 static int set_saturation(sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -324,7 +317,6 @@ static int set_saturation(sensor_t *sensor, int level)
     return ret;
 }
 
-//设置曝光度
 static int set_exposure_ctrl(sensor_t *sensor, int enable)
 {
     int ret = 0;
@@ -364,8 +356,6 @@ static int set_exposure_ctrl(sensor_t *sensor, int enable)
     }
     return ret;
 }
-
-//设置AWB mode 
 static int set_wb_mode (sensor_t *sensor, int mode)
 {
     int ret = 0;
@@ -400,77 +390,19 @@ static int set_wb_mode (sensor_t *sensor, int mode)
     return ret;
 }
 
-//设置special
 static int set_special_effect (sensor_t *sensor, int effect)
 {
     int ret = 0;
-    if (effect > special_maix) {
-        ESP_LOGW(TAG, "Invalid special : %u", effect);
-        effect = special_maix;
-    }
-    switch (effect) {
-    case normal:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x00); 
-        break;
-    case blueish:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x01); 
-        break;
-    case redish:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x02);
-        break;
-    case BorW:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x03);
-        break;
-    case sepia:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x04); 
-        break; 
-    case negative:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x05);
-        break;
-    case greenish:
-        ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x06); 
-        break; 
-    default:
-        ESP_LOGW(TAG, "special fail");
-        ret = -1;
-        break;
-    }
-    if (ret == 0) {
-        ESP_LOGD(TAG, "Set special to: %d", effect);
-    }
+  
     return ret;
 }
-
-//设置Image quality
 static int set_quality (sensor_t *sensor, int quality)
 {
     int ret = 0;
-    if (quality > quality_maix) {
-        ESP_LOGW(TAG, "Invalid quality : %u", quality);
-        quality = quality_maix;
-    }
-    switch (quality) {
-    case quality_high:
-        ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x00); 
-        break;
-    case quality_default:
-        ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x01); 
-        break;
-    case quality_low:
-        ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x02);
-        break;
-    default:
-        ESP_LOGW(TAG, "quality fail");
-        ret = -1;
-        break;
-    }
-    if (ret == 0) {
-        ESP_LOGD(TAG, "Set quality to: %d", quality);
-    }
+  
     return ret;
 }
 
-//设置AGC mode 
 static int set_AGC_mode  (sensor_t *sensor, int mode)
 {
     int ret = 0;
@@ -496,7 +428,6 @@ static int set_AGC_mode  (sensor_t *sensor, int mode)
     return ret;
 }
 
-//设置Analog_gain  
 static int set_agc_gain   (sensor_t *sensor, int gain)
 {
     int ret = 0;
@@ -511,7 +442,6 @@ static int set_agc_gain   (sensor_t *sensor, int gain)
     return ret;
 }
 
-//设置DirectModeCodedexposure line h 
 static int set_mamual_exp_h   (sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -526,7 +456,6 @@ static int set_mamual_exp_h   (sensor_t *sensor, int level)
     return ret;
 }
 
-//设置DirectModeCodedexposure line l 
 static int set_mamual_exp_l   (sensor_t *sensor, int level)
 {
     int ret = 0;
@@ -541,31 +470,6 @@ static int set_mamual_exp_l   (sensor_t *sensor, int level)
     return ret;
 }
 
-//设置Bypass  
-static int set_bypass (sensor_t *sensor, int level)
-{
-    int ret = 0;
-    if (level > bypass_maix) {
-        ESP_LOGW(TAG, "Invalid bypass    : %u", level);
-        level = bypass_maix;
-    }
-    switch (level) {
-    case AGC_Auto:
-        ret = write_reg(sensor->slv_addr, BYPASS, 0x00); 
-        break;
-    case AGC_Manual:
-        ret = write_reg(sensor->slv_addr, BYPASS, 0x01); 
-        break;
-    default:
-        ESP_LOGW(TAG, "bypass fail");
-        ret = -1;
-        break;
-    }
-    if (ret == 0) {
-        ESP_LOGD(TAG, "Set bypass   to: %d", level);
-    }
-    return ret;
-}
 
 static int get_reg(sensor_t *sensor, int reg, int mask)
 {
@@ -652,7 +556,6 @@ int mega_ccm_init(sensor_t *sensor)
     sensor->set_agc_gain = set_agc_gain;     
     sensor->set_mamual_exp_h = set_mamual_exp_h;
     sensor->set_mamual_exp_l= set_mamual_exp_l;
-    sensor->set_bypass= set_bypass;
     sensor->set_gainceiling = set_gainceiling_dummy;
 
     sensor->set_sharpness = set_dummy;
@@ -680,22 +583,3 @@ int mega_ccm_init(sensor_t *sensor)
     ESP_LOGD(TAG, "mega_ccm Attached");
     return 0;
 }
-
-    // sensor->init_status = init_status;
-    // sensor->reset = reset;
-    // sensor->set_pixformat = set_pixformat;
-    // sensor->set_framesize = set_framesize;
-
-    // sensor->set_brightness = set_dummy;
-    // sensor->set_contrast = set_dummy;
-    // sensor->set_saturation = set_dummy;
-    // sensor->set_exposure_ctrl = set_dummy;
-    // sensor->set_wb_mode = set_dummy;
-    // sensor->set_special_effect = set_dummy;
-    // sensor->set_quality = set_dummy;
-    // sensor->set_AGC_mode = set_dummy;
-    // sensor->set_agc_gain = set_dummy;     
-    // sensor->set_mamual_exp_h = set_dummy;
-    // sensor->set_mamual_exp_l= set_dummy;
-    // sensor->set_bypass= set_dummy;
-    // sensor->set_gainceiling = set_gainceiling_dummy;

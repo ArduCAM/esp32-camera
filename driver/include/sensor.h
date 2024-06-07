@@ -160,10 +160,7 @@ typedef enum {
     AGC_Manual,
 } AGC_MODE;
 
-typedef enum {  
-    disable,
-    enable,
-} BYPASS;
+
 typedef enum {
     FRAMESIZE_96X96,    // 96x96
     FRAMESIZE_128x128,  // 128x128
@@ -312,7 +309,6 @@ typedef struct _sensor {
     int  (*set_agc_gain)        (sensor_t *sensor, int gain);
     int  (*set_mamual_exp_h)    (sensor_t *sensor, int level);
     int  (*set_mamual_exp_l)    (sensor_t *sensor, int level);
-    int  (*set_bypass)          (sensor_t *sensor, int level);
     
     int  (*init_status)         (sensor_t *sensor);
     int  (*reset)               (sensor_t *sensor); // Reset the configuration of the sensor, and return ESP_OK if reset is successful
