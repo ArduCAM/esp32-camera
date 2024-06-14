@@ -32,18 +32,17 @@ static const char *TAG = "mega_ccm";
 
 #define H8(v) ((v)>>8)
 #define L8(v) ((v)&0xff)
-#define camera_rest_maix   1
-#define brightness_maix    8
-#define contarst_maix      6
-#define saturation_maix    6
-#define exposure_maix      6
-#define awb_mode_maix      4
-#define special_maix       6
-#define quality_maix       2
-#define agc_mode_maix      1
-#define analog_gain_maix   6
-#define mamual_exp_h_maix  6
-#define mamual_exp_l_maix  6
+#define brightness_max   8
+#define contarst_max     6
+#define saturation_max   6
+#define exposure_max     6
+#define awb_mode_max     4
+#define special_max      6
+#define quality_max      2
+#define agc_mode_max     1
+#define analog_gain_max  6
+#define mamual_exp_h_max 6
+#define mamual_exp_l_max 6
 //#define REG_DEBUG_ON
 
 static int read_reg(uint8_t slv_addr, const uint16_t reg)
@@ -111,19 +110,19 @@ static int reset(sensor_t *sensor)
     return ret;
 }
 
-static int set_Camera_rest(sensor_t *sensor, int level)
-{
-    int ret = 0;
-    if (level > camera_rest_maix) {
-        ESP_LOGW(TAG, "Invalid Camera_rest: %u", level);
-        level = camera_rest_maix;
-    }
-    ret = write_reg(sensor->slv_addr, CAMERA_RST_REG, level);
-    if (ret == 0) {
-        ESP_LOGD(TAG, "Set Camera_rest to: %d", level);
-    }
-    return ret;
-}
+// static int set_Camera_rest(sensor_t *sensor, int level)
+// {
+//     int ret = 0;
+//     if (level > camera_rest_max) {
+//         ESP_LOGW(TAG, "Invalid Camera_rest: %u", level);
+//         level = camera_rest_max;
+//     }
+//     ret = write_reg(sensor->slv_addr, CAMERA_RST_REG, level);
+//     if (ret == 0) {
+//         ESP_LOGD(TAG, "Set Camera_rest to: %d", level);
+//     }
+//     return ret;
+// }
 static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
 {
     int ret = 0;
@@ -192,38 +191,38 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
 static int set_brightness(sensor_t *sensor, int level)
 {
     int ret = 0;
-    if (level > brightness_maix) {
+    if (level > brightness_max) {
         ESP_LOGW(TAG, "Invalid brightness: %u", level);
-        level = brightness_maix;
+        level = brightness_max;
     }
     switch (level) {
     case brightness_0:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x00); //default
-        break;
-    case brightness_1:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x01); //+1
-        break;
-    case brightness_2:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x02); //-1
-        break;
-    case brightness_3:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x03); //+2
-        break;
-    case brightness_4:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x04); //-2
-        break;
-    case brightness_5:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x05); //+3
+       ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x08); //-4
         break;  
-    case brightness_6:
+    case brightness_1:
         ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x06); //-3
         break;
+    case brightness_2:
+        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x04); //-2
+        break;
+    case brightness_3:
+        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x02); //-1  
+        break;
+    case brightness_4:
+         ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x00); //default
+        break;
+    case brightness_5:
+       ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x01); //+1
+        break;  
+    case brightness_6:
+        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x03); //+2
+        break;
     case brightness_7:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x07); //+4
+        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x05); //+3  
         break;
     case brightness_8:
-        ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x08); //-4
-        break;  
+    ret = write_reg(sensor->slv_addr, BRIGHTNESS_REG, 0x07); //+4
+      break;  
     default:
         ESP_LOGW(TAG, "brightness fail");
         ret = -1;
@@ -238,32 +237,31 @@ static int set_brightness(sensor_t *sensor, int level)
 static int set_contrast(sensor_t *sensor, int level)
 {
     int ret = 0;
-    if (level > contarst_maix) {
+    if (level > contarst_max) {
         ESP_LOGW(TAG, "Invalid contrast: %u", level);
-        level = contarst_maix;
+        level = contarst_max;
     }
     switch (level) {
     case contrast_0:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x00); //default
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x06); //-3
         break;
     case contrast_1:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x01); //+1
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x04); //-2
         break;
-
     case contrast_2:
         ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x02); //-1
         break;
     case contrast_3:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x03); //+2
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x00); //default
         break;
     case contrast_4:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x04); //-2
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x01); //+1
         break;
     case contrast_5:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x05); //+3
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x03); //+2 
         break;  
     case contrast_6:
-        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x06); //-3
+        ret = write_reg(sensor->slv_addr, CONTRAST_REG, 0x05); //+3
         break;  
     default:
         ESP_LOGW(TAG, "contrast fail");
@@ -279,32 +277,36 @@ static int set_contrast(sensor_t *sensor, int level)
 static int set_saturation(sensor_t *sensor, int level)
 {
     int ret = 0;
-    if (level > saturation_maix) {
+    if (level > saturation_max) {
         ESP_LOGW(TAG, "Invalid saturation: %u", level);
-        level = saturation_maix;
+        level = saturation_max;
     }
     switch (level) {
     case saturation_0:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x00); //default
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x06); //-3
+        
         break;
     case saturation_1:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x01); //+1
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x04); //-2
+        
         break;
 
     case saturation_2:
         ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x02); //-1
         break;
     case saturation_3:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x03); //+2
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x00); //default
+        
         break;
     case saturation_4:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x04); //-2
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x01); //+1
         break;
     case saturation_5:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x05); //+3
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x03); //+2
+        
         break;  
     case saturation_6:
-        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x06); //-3
+        ret = write_reg(sensor->slv_addr, SATURATION_REG, 0x05); //+3
         break;  
     default:
         ESP_LOGW(TAG, "saturation fail");
@@ -320,9 +322,9 @@ static int set_saturation(sensor_t *sensor, int level)
 static int set_exposure_ctrl(sensor_t *sensor, int enable)
 {
     int ret = 0;
-    if (enable > exposure_maix) {
+    if (enable > exposure_max) {
         ESP_LOGW(TAG, "Invalid exposure: %u", enable);
-        enable = exposure_maix;
+        enable = exposure_max;
     }
     switch (enable) {
     case exposure_0:
@@ -359,9 +361,9 @@ static int set_exposure_ctrl(sensor_t *sensor, int enable)
 static int set_wb_mode (sensor_t *sensor, int mode)
 {
     int ret = 0;
-    if (mode > awb_mode_maix) {
+    if (mode > awb_mode_max) {
         ESP_LOGW(TAG, "Invalid AWB_mode : %u", mode);
-        mode = awb_mode_maix;
+        mode = awb_mode_max;
     }
     switch (mode) {
     case Auto:
@@ -393,22 +395,68 @@ static int set_wb_mode (sensor_t *sensor, int mode)
 static int set_special_effect (sensor_t *sensor, int effect)
 {
     int ret = 0;
-  
+     if (effect > special_max) {
+        ESP_LOGW(TAG, "Invalid special effect: %u", effect);
+        effect = special_max;
+    }
+    switch (effect) {
+    case normal:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x00); 
+        break;
+    case blueish:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x01); 
+        break;
+    case redish:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x02); 
+        break;
+    case BorW:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x03); 
+        break;
+    case sepia:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x04); 
+        break;
+    case negative:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x05); 
+        break;
+    case greenish:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x06); 
+        break;
+    default:
+     ret = write_reg(sensor->slv_addr, SPECIAL_REG, 0x00); 
+        break;
+    }
+    if (ret == 0) {
+        ESP_LOGD(TAG, "Set special effect to: %d", effect);
+    }
     return ret;
 }
 static int set_quality (sensor_t *sensor, int quality)
 {
     int ret = 0;
-  
+   if (quality > quality_max) {
+        ESP_LOGW(TAG, "Invalid quality  : %u", quality);
+        quality = quality_max;
+    }
+     switch (quality) {
+     case quality_high:
+        ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x00); 
+        break;
+        case quality_default:
+             ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x01); 
+        break;
+        case quality_low:
+             ret = write_reg(sensor->slv_addr, IMAGE_QUALITY_REG, 0x02); 
+        break;
+     }
     return ret;
 }
 
 static int set_AGC_mode  (sensor_t *sensor, int mode)
 {
     int ret = 0;
-    if (mode > agc_mode_maix) {
+    if (mode > agc_mode_max) {
         ESP_LOGW(TAG, "Invalid AGC_mode  : %u", mode);
-        mode = agc_mode_maix;
+        mode = agc_mode_max;
     }
     switch (mode) {
     case AGC_Auto:
@@ -431,9 +479,9 @@ static int set_AGC_mode  (sensor_t *sensor, int mode)
 static int set_agc_gain   (sensor_t *sensor, int gain)
 {
     int ret = 0;
-    if (gain > analog_gain_maix) {
+    if (gain > analog_gain_max) {
         ESP_LOGW(TAG, "Invalid analog_gain   : %u", gain);
-        gain = analog_gain_maix;
+        gain = analog_gain_max;
     }
     ret = write_reg(sensor->slv_addr, MANUAL_AGC_REG, gain);
     if (ret == 0) {
@@ -445,9 +493,9 @@ static int set_agc_gain   (sensor_t *sensor, int gain)
 static int set_mamual_exp_h   (sensor_t *sensor, int level)
 {
     int ret = 0;
-    if (level > mamual_exp_h_maix) {
+    if (level > mamual_exp_h_max) {
         ESP_LOGW(TAG, "Invalid mamual_exp_h    : %u", level);
-        level = mamual_exp_h_maix;
+        level = mamual_exp_h_max;
     }
     ret = write_reg(sensor->slv_addr, MANUAL_EXP_H_REG , level);
     if (ret == 0) {
@@ -459,9 +507,9 @@ static int set_mamual_exp_h   (sensor_t *sensor, int level)
 static int set_mamual_exp_l   (sensor_t *sensor, int level)
 {
     int ret = 0;
-    if (level > mamual_exp_l_maix) {
+    if (level > mamual_exp_l_max) {
         ESP_LOGW(TAG, "Invalid mamual_exp_l    : %u", level);
-        level = mamual_exp_l_maix;
+        level = mamual_exp_l_max;
     }
     ret = write_reg(sensor->slv_addr, MANUAL_EXP_L_REG , level);
     if (ret == 0) {

@@ -327,19 +327,7 @@ esp_err_t esp_camera_init(const camera_config_t *config)
 
     s_state->sensor.pixformat = pix_format;
     s_state->sensor.status.framesize = frame_size;
-
-    s_state->sensor.set_pixformat(&s_state->sensor, pix_format);
-
-    s_state->sensor.set_brightness(&s_state->sensor, brightness_t0);
-    s_state->sensor.set_contrast(&s_state->sensor, contrast_t0);
-    s_state->sensor.set_saturation(&s_state->sensor, saturation_t0);
-    s_state->sensor.set_exposure_ctrl(&s_state->sensor, exposure_t0);
-    s_state->sensor.set_special_effect(&s_state->sensor, special0);
-    s_state->sensor.set_quality(&s_state->sensor, image_quality0);
-    s_state->sensor.set_AGC_mode(&s_state->sensor, agc_mode0);
-    s_state->sensor.set_agc_gain(&s_state->sensor, analog_gain);  
-    s_state->sensor.set_mamual_exp_h(&s_state->sensor, mamual_exp_h);    
-    s_state->sensor.set_mamual_exp_l(&s_state->sensor, mamual_exp_l);    
+    s_state->sensor.set_pixformat(&s_state->sensor, pix_format);  
     if (s_state->sensor.set_framesize(&s_state->sensor, frame_size) != 0) {
         ESP_LOGE(TAG, "Failed to set frame size");
         err = ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE;
