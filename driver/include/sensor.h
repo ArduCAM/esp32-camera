@@ -156,6 +156,17 @@ typedef enum {
 } IMAGE_QUALITY;
 
 typedef enum {  
+    mirror_disable,
+    mirror_enable,
+} IMAGE_MIRROR;
+
+
+typedef enum {  
+    flip_disable,
+    flip_enable,
+} IMAGE_FLIP;
+
+typedef enum {  
     AGC_Auto,
     AGC_Manual,
 } AGC_MODE;

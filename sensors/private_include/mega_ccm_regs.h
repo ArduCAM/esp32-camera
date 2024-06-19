@@ -30,6 +30,9 @@
 #define SHARPNESS_REG               SENSOR_BASE|0x28
 #define FOCUS_REG                   SENSOR_BASE|0x29
 #define IMAGE_QUALITY_REG           SENSOR_BASE|0x2A
+#define IMAGE_FLIP_REG           	SENSOR_BASE|0x2B
+#define IMAGE_MIRROR_REG            SENSOR_BASE|0x2C
+
 
 
 #define AGC_MODE_REG				SENSOR_BASE|0x30

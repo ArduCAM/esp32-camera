@@ -39,6 +39,8 @@ static const char *TAG = "mega_ccm";
 #define awb_mode_max     4
 #define special_max      6
 #define quality_max      2
+#define mirror_max       2
+#define flip_max         2
 #define agc_mode_max     1
 #define analog_gain_max  6
 #define mamual_exp_h_max 6
@@ -451,6 +453,43 @@ static int set_quality (sensor_t *sensor, int quality)
     return ret;
 }
 
+
+static int set_mirror (sensor_t *sensor, int mirror)
+{
+    int ret = 0;
+   if (mirror > mirror_max) {
+        ESP_LOGW(TAG, "Invalid mirror  : %u", mirror);
+        mirror = mirror_max;
+    }
+     switch (mirror) {
+     case mirror_enable:
+        ret = write_reg(sensor->slv_addr, IMAGE_MIRROR_REG, 0x01); 
+        break;
+        case mirror_disable:
+             ret = write_reg(sensor->slv_addr, IMAGE_MIRROR_REG, 0x00); 
+        break;
+     }
+    return ret;
+}
+static int set_flip (sensor_t *sensor, int flip)
+{
+    int ret = 0;
+   if (flip > flip_max) {
+        ESP_LOGW(TAG, "Invalid flip  : %u", flip);
+        flip = mirror_max;
+    }
+     switch (flip) {
+     case flip_enable:
+        ret = write_reg(sensor->slv_addr, IMAGE_FLIP_REG, 0x01); 
+        break;
+        case flip_disable:
+             ret = write_reg(sensor->slv_addr, IMAGE_FLIP_REG, 0x00); 
+        break;
+     }
+    return ret;
+}
+
+
 static int set_AGC_mode  (sensor_t *sensor, int mode)
 {
     int ret = 0;
@@ -611,8 +650,8 @@ int mega_ccm_init(sensor_t *sensor)
     sensor->set_colorbar = set_dummy;
     sensor->set_whitebal = set_dummy;
     sensor->set_gain_ctrl = set_dummy;
-    sensor->set_hmirror = set_dummy;
-    sensor->set_vflip = set_dummy;
+    sensor->set_hmirror = set_mirror;
+    sensor->set_vflip = set_flip;
     sensor->set_aec2 = set_dummy;
     sensor->set_awb_gain = set_dummy;
     sensor->set_aec_value = set_dummy;
